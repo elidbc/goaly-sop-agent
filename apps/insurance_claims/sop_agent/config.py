@@ -40,8 +40,8 @@ class Settings:
     """All the values that control the agent. One object for the full app."""
 
     # --- AI model (provider-agnostic) ---
-    llm_provider: str = "anthropic"
-    llm_model: str = PROVIDERS["anthropic"].default_model
+    llm_provider: str = "openrouter"
+    llm_model: str = PROVIDERS["openrouter"].default_model
     llm_api_key: str | None = None
     llm_base_url: str | None = None    # Overrides the preset base URL (any OpenAI-compatible server).
 
@@ -91,10 +91,10 @@ def with_model(settings: Settings, provider: str, model: str | None = None, api_
 def load_settings(env_file: Path | None = None) -> Settings:
     """Load .env (the real environment wins), then read the settings."""
     load_dotenv(env_file or APP_DIR / ".env", override=False)
-    provider = os.getenv("LLM_PROVIDER", "anthropic")
+    provider = os.getenv("LLM_PROVIDER", "openrouter")
     base = Settings(
         llm_provider=provider,
-        llm_model=os.getenv("LLM_MODEL") or PROVIDERS.get(provider, PROVIDERS["anthropic"]).default_model,
+        llm_model=os.getenv("LLM_MODEL") or PROVIDERS.get(provider, PROVIDERS["openrouter"]).default_model,
         llm_api_key=os.getenv("LLM_API_KEY") or None,
         llm_base_url=os.getenv("LLM_BASE_URL") or None,
         demo_today=os.getenv("DEMO_TODAY", Settings.demo_today),

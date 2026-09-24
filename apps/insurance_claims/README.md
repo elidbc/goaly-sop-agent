@@ -1,54 +1,23 @@
-# Agent design
+# Design choices
 
-How to view and run the demo: see the [top-level README](../../README.md).
-
-## One turn
-
-```
-caller message
-  → 1. EXTRACT  (LLM)   extraction.py     message → structured facts, for all phases
-  → 2. DECIDE   (code)  controller.py     apply the SOP → TurnPlan (goal + allowed facts)
-  → 3. PHRASE   (LLM)   responder.py      TurnPlan → natural reply
-  → 4. CHECK    (code)  output_guard.py   block leaks → final reply
-```
-
-`agent.py` runs these steps. The `SessionState` (`state.py`) is the source of truth. It holds the phase,
-what the caller said, what was verified, the memory, and a log of decisions for the debug panel.
-
-## Phases
-
-| Phase | Freedom | What the code does | What the LLM does |
-|---|---|---|---|
-| VERIFY_ID | strict | Matches ≥3 identity fields against the records (`verification.py`). Representatives also need an authorization record and consent. | Extracts fields from free text; asks for missing details. |
-| RESOLVE_INTENT | medium | Filters the claims by structured hints (`case_resolver.py`); accepts only claim IDs from its own list. | Ranks the candidates for vague hints; the caller confirms. |
-| PROCESS_CASE | flexible | Releases the claim record, the field meanings, and the approved guideline text (`guidance.py`). | Explains and answers, only from those facts. |
-| POST_PROCESS | structured | Builds the email summary from what it recorded (`summary.py`); sends only after "yes", only to the address on file. | Recaps and asks. |
-
-One message can pass through several phases. For example, the task's test case goes from VERIFY_ID through
-RESOLVE_INTENT to PROCESS_CASE in one turn.
-
-## Key mechanisms
-
-- **Memory.** Extraction runs in every phase and saves intent and claim hints into `state.memory`,
-  but only the controller changes the phase. Hints accumulate over turns. A hint that points to a different
-  claim replaces the old hints.
-- **TurnPlan.** The only channel from the controller to the reply LLM: a goal, constraints, and the facts
-  it may use. Before verification, the plan contains no account data.
-- **Phase-gated tools** (`tools.py`). `TOOLS_BY_PHASE` lists the allowed tools, and any other call raises
-  `ToolNotAllowed`. The data store (`data_store.py`) returns a claim only to its owner.
-- **Scope guard** (`scope_guard.py`). Off-topic messages are declined. After 3 in a row, the reply suggests
-  a human representative. An in-scope message resets the counter.
-- **Model adapters** (`llm_client.py`). `LLMClient` has two methods: `extract()` (structured output) and
-  `generate()` (text). There is one adapter for Anthropic and one for OpenAI-compatible APIs, and the providers
-  are presets in `config.py`. The extraction schema is flat (every field required, no nulls), because
-  providers reject complex structured-output schemas. If a model has no structured output, the adapter asks
-  for JSON in the prompt and validates it with Pydantic.
-- **Fail safe.** If extraction fails, the agent changes nothing and asks the caller to repeat.
-
-## Tests
-
-- `tests/test_verification.py`: identity matching (formats, aliases, national ID, refusals, mismatches).
-- `tests/test_controller.py`: SOP rules without an LLM (phase gate, one-turn demo case, consent timeout,
-  off-topic counter, skipped email).
-- `tests/scenarios.py` + `tests/test_conversations.py`: 12 scripted conversations with the real model
-  (`pytest -m llm -s`).
+- **Deterministic code handles safety, LLM handles communication.** Each turn has four steps: an 
+LLM extracts facts from the message, a the state machine runs the SOP, an LLM writes the reply, 
+and a code check inspects it. The LLM itself cannot change the phase, verify a caller, 
+or call a tool.
+- **Safety by construction.** The reply LLM gets only the data that the current phase releases.
+  Before verification, it has no access toclaim data, so it cannot leak any.
+  Tools are gated by phase, and a regex output guard is a final line of defense to avoid exposing sensitive data.
+- **Deterministic verification.** Identity is checked by plain code: at least 3 of the 5 README fields must match
+  one record, with normalized formats and the aliases in the data. The policy number helps identify the claim, but does not count as personal ID.
+  If only 2 fields match, the agent asks for one more field.
+- **Memory across phases.** The extraction step saves facts for all phases in every turn. A claim hint given during
+  verification is used after verification to potentially help find the claim.
+- **Freedom by phase.** Structured claim hints (type, status, date) are filtered. Vague hints
+  (e.g. "the one about the biopsy") are ranked by the LLM, and the caller confirms the result.
+  In PROCESS_CASE the LLM answers freely, but only from the claim record and the approved guideline text.
+- **Model agnostic.** One small interface with adapters: the Anthropic API and the OpenAI-compatible API
+  (OpenAI, OpenRouter, and others). All 12 conversation scenarios pass with `openai/gpt-6-luna` and `claude-sonnet-5`.
+  A weaker model can write weaker replies, but the state-managment code ensures it cannot break the SOP rules.
+- **Scope kept to the task.** Off-topic questions are declined, and the agent suggests a human representative
+  after 3 consecutive off-topic questions. There is no actual transfer to a human-in-the-loop. The email summary goes only to the address on file and is a mock. "Today" is fixed at 2026-02-15, so the fixture deadlines are still open and to 
+  vary the status of claims in the DB.
