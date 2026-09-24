@@ -9,7 +9,9 @@ The LLM understands the caller and writes natural replies.
 
 ## Setup
 
-**Hosted demo:** (link follows). No setup: open it and chat.
+**Hosted demo:** https://goaly-sop-agent-gsuy.onrender.com (no setup: open it and chat).
+It runs `openai/gpt-6-luna` through OpenRouter. The free server sleeps when nobody uses it,
+so the first visit can take about a minute to load. A reply takes about 10 seconds.
 
 To run it locally, you need Python 3.10 or later and an API key from one of the supported providers:
 **OpenRouter** (one key for OpenAI, Google, Anthropic, Meta, and other models), **OpenAI**, or **Anthropic**.
