@@ -1,0 +1,20 @@
+# Render blueprint: how Render builds and runs the hosted demo.
+# Render reads this file when you create a "Blueprint" from this GitHub repo.
+services:
+  - type: web
+    name: goaly-sop-agent
+    runtime: python
+    plan: free
+    rootDir: apps/insurance_claims
+    buildCommand: pip install -r requirements.txt
+    # Render gives the port in $PORT. Gradio must listen on all interfaces.
+    startCommand: GRADIO_SERVER_NAME=0.0.0.0 GRADIO_SERVER_PORT=$PORT python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.11
+      - key: LLM_PROVIDER
+        value: openrouter
+      - key: LLM_MODEL
+        value: openai/gpt-6-luna
+      - key: OR_API_KEY
+        sync: false   # Secret: Render asks for the value in the dashboard. It is not in the repo.
