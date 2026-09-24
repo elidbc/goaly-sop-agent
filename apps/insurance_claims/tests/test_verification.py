@@ -72,7 +72,7 @@ def test_wrong_values_do_not_verify(store):
 
 
 def test_two_of_three_asks_for_one_more(store):
-    """Q2: three fields, two match -> ask for one more field (not a failure)."""
+    """Three fields, two match -> ask for one more field (not a failure)."""
     claims = IdentityClaims(full_name="Margaret Chen", dob="1985-03-15", id_last4="0000")
     result = verify_identity(claims, store)
     assert result.status == VerificationStatus.NEED_MORE
@@ -96,7 +96,7 @@ def test_refused_fields_reduce_the_options(store):
 
 
 def test_policy_number_does_not_count(store):
-    """Name + policy number + DOB -> NEED_MORE (policy number is not a counted field, Q1)."""
+    """Name + policy number + DOB -> NEED_MORE (policy number is not a counted field)."""
     claims = IdentityClaims(full_name="Margaret Chen", dob="1985-03-15", policy_number="POL-9921")
     assert verify_identity(claims, store).status == VerificationStatus.NEED_MORE
 

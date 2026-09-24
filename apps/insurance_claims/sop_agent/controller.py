@@ -2,8 +2,8 @@
 The SOP controller: the state machine that owns the workflow.
 
 WHERE THIS FITS:
-    This is the core of the harness. It is almost entirely pure 
-    deterministicPython code (with one small LLM use).
+    This is the core of the harness. It is almost entirely pure
+    deterministic Python code (with one small LLM use).
     Each turn, it gets the ExtractedFacts, updates the SessionState, and decides
     if the phase changes, which tools run, and what the reply should do.
     The responder LLM then writes the words for the TurnPlan.
@@ -23,7 +23,7 @@ from .verification import COUNTED_FIELDS, VerificationStatus
 
 MAX_STEPS_PER_TURN = 5
 
-# Disclaimer prepended to replies before verification.
+# Rule for the responder before verification.
 NO_ACCOUNT_DATA = (
     "The caller is NOT verified. Do not mention or confirm any claim, account, or policy detail. "
     "You may repeat only what the caller said."
@@ -251,7 +251,7 @@ class SopController:
 
     def step_verify_representative(self, state: SessionState, facts: ExtractedFacts) -> TurnPlan | None:
         """
-        VERIFY_ID for a caller who calls for another person (Q4 in product_map.md):
+        VERIFY_ID for a caller who calls for another person:
             1. Verify the CUSTOMER identity with 3 fields (the representative gives them).
             2. Check representatives.json: can this representative call for this customer?
                The representative does not verify their own identity.
@@ -351,7 +351,6 @@ class SopController:
 
         all_briefs = [claim_brief(c) for c in claims]
         if resolution.status == ResolutionStatus.MANY_MATCHES:
-            state.candidate_case_ids = resolution.candidate_ids
             by_id = {c.case_id: c for c in claims}
             return TurnPlan(
                 phase=state.phase,
@@ -386,7 +385,6 @@ class SopController:
     def _select_case(self, state: SessionState, case_id: str, reason: str) -> None:
         state.selected_case_id = case_id
         state.pending_case_id = None
-        state.candidate_case_ids = []
         state.case_intro_done = False
         state.events.append(f"claim selected: {case_id} ({reason})")
         self.goto(state, Phase.PROCESS_CASE, "claim identified")

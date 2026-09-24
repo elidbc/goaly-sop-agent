@@ -46,7 +46,7 @@ class IdentityClaims(BaseModel):
     phone: str | None = None
     email: str | None = None
     id_last4: str | None = None        # SSN or national ID
-    policy_number: str | None = None   # Not a counted identity field (Q1).
+    policy_number: str | None = None   # Not a counted identity field.
 
 
 class CaseHints(BaseModel):
@@ -102,7 +102,6 @@ class SessionState(BaseModel):
     # RESOLVE_INTENT and PROCESS_CASE
     selected_case_id: str | None = None
     pending_case_id: str | None = None # Waits for the caller to confirm it.
-    candidate_case_ids: list[str] = []
     case_intro_done: bool = False
     missing_documents: list[str] = []
 

@@ -1,7 +1,7 @@
 """
 The business actions ("tools") and the phase gate.
 
-The controller calls the tools; the LLM does not (D3). TOOLS_BY_PHASE lists what each phase
+The controller calls the tools; the LLM does not. TOOLS_BY_PHASE lists what each phase
 may use, and ToolBox.call() raises ToolNotAllowed otherwise. So even a bug cannot list claims
 during VERIFY_ID.
 

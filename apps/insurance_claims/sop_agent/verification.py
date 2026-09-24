@@ -2,7 +2,7 @@
 Identity verification. Plain code, no LLM: an LLM can be persuaded, code cannot.
 
 VERIFIED  - exactly one record matches >= 3 of: full name, DOB, phone, email, ID last 4 (aliases count).
-NEED_MORE - not enough matches yet, but the caller can still give more fields (Q2: ask for one more).
+NEED_MORE - not enough matches yet, but the caller can still give more fields (ask for one more).
 MISMATCH  - even with every remaining field, no record can reach 3. Ask the caller to check the details.
 The result never tells the caller WHICH field is wrong.
 """
@@ -16,7 +16,7 @@ from .models import Policyholder
 from .normalize import normalize_dob, normalize_email, normalize_last4, normalize_name, normalize_phone
 from .state import IdentityClaims
 
-# policy_number does not count (Q1).
+# policy_number does not count: it is not one of the five README fields.
 COUNTED_FIELDS = ["full_name", "dob", "phone", "email", "id_last4"]
 
 

@@ -2,7 +2,7 @@
 Out-of-scope policy (README): decline politely; if the caller keeps trying, suggest a human
 representative. That is only a sentence in the reply: no transfer, no phase change.
 
-The counter resets after an in-scope message (Q5), so the limit counts off-topic messages in a row.
+The counter resets after an in-scope message, so the limit counts off-topic messages in a row.
 A mixed message ("My DOB is ... Also, what is RL?") is in scope: the facts are saved,
 the off-topic part is declined, and it is not a strike.
 """

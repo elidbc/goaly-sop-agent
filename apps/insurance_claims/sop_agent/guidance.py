@@ -3,7 +3,7 @@ Approved document guidance from fixtures/required_document_guideline.json. Plain
 
 PROCESS_CASE gives this text to the responder, which rephrases it. The LLM must not invent rules.
 For follow-up questions, the responder gets ALL the items that apply, with keyword_match and
-intent_match flags, and chooses (Q6). Keyword matching alone is too fragile.
+intent_match flags, and chooses. Keyword matching alone is too fragile.
 
 Data quirk: claims say "pathology report", the guideline says "original pathology report".
 resolve_document_key() maps them. "diagnosis report" has no entry, so the default text applies.

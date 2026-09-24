@@ -1,7 +1,7 @@
 """
 The POST_PROCESS email summary: what was discussed, the claim status, and the next steps.
 The content comes from what the code recorded during the call, so it stays grounded.
-Plain template, no LLM (Q8).
+Plain template, no LLM.
 """
 
 from pydantic import BaseModel

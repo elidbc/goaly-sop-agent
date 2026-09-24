@@ -1,5 +1,3 @@
-# Render blueprint: how Render builds and runs the hosted demo.
-# Render reads this file when you create a "Blueprint" from this GitHub repo.
 services:
   - type: web
     name: goaly-sop-agent

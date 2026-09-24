@@ -48,6 +48,8 @@ def new_conversation():
 
 
 def on_send(message: str, session: SessionState, provider: str, model: str, api_key: str):
+    # The session is missing if the server restarted (the free host sleeps) or the page did not finish loading.
+    session = session or SopAgent.new_session()
     if not message.strip():
         return to_chat(session), session, gr.skip(), ""
     try:
@@ -97,4 +99,4 @@ def build_ui() -> gr.Blocks:
 
 
 if __name__ == "__main__":
-    build_ui().launch()
+    build_ui().launch(show_error=True)

@@ -94,7 +94,7 @@ def rank_with_llm(candidates: list[Claim], hints: CaseHints, llm: LLMClient) -> 
     except LLMError:
         return [c.case_id for c in candidates], False
     valid = [c.case_id for c in candidates]
-    from_llm = [cid for cid in dict.fromkeys(ranking.ranked_ids) if cid in valid] 
+    from_llm = [cid for cid in dict.fromkeys(ranking.ranked_ids) if cid in valid]
     ranked = from_llm + [cid for cid in valid if cid not in from_llm]
     return ranked, ranking.confident and bool(from_llm)
 

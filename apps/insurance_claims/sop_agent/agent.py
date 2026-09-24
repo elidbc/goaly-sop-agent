@@ -93,7 +93,7 @@ class SopAgent:
             state.history.append(ChatTurn(role="assistant", text=TECHNICAL_PROBLEM))
             return AgentReply(text=TECHNICAL_PROBLEM, debug={"phase": state.phase.value, "error": str(error),
                                                              "this_turn": {"events": state.events[events_before:]}})
-        plan = self.controller.advance(state, facts)              
+        plan = self.controller.advance(state, facts)                                          # 2. decide
         try:
             reply = write_reply(plan, state, self.llm)                                        # 3. phrase
         except LLMError as error:
