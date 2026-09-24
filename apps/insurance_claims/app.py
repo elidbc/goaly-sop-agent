@@ -29,7 +29,7 @@ EXAMPLES = [
 
 def get_agent(provider: str, model: str, api_key: str) -> SopAgent | None:
     """Values from the page win. Empty values fall back to the server settings for that provider."""
-    settings = with_model(SETTINGS, provider, model.strip() or None, api_key.strip() or None)
+    settings = with_model(SETTINGS, provider or SETTINGS.llm_provider, model or None, api_key or None)
     if not settings.llm_api_key:
         return None
     cache_key = (settings.llm_provider, settings.llm_model, settings.llm_api_key)
@@ -50,7 +50,9 @@ def new_conversation():
 def on_send(message: str, session: SessionState, provider: str, model: str, api_key: str):
     # The session is missing if the server restarted (the free host sleeps) or the page did not finish loading.
     session = session or SopAgent.new_session()
-    if not message.strip():
+    # A closed "Model settings" panel sends None for its fields.
+    message, model, api_key = (message or "").strip(), (model or "").strip(), (api_key or "").strip()
+    if not message:
         return to_chat(session), session, gr.skip(), ""
     try:
         agent = get_agent(provider, model, api_key)
